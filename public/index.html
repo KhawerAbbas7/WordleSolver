@@ -91,34 +91,6 @@
   <div id="grid"></div>
   <div id="output">Loading words...</div>
 <script>
-const grid = document.getElementById('grid')
-const output = document.getElementById('output')
-let wordList = []
-let debounceTimer, lastWords = []
-
-for (let r = 0; r < 5; r++) {
-  const row = document.createElement('div')
-  row.className = 'wordle-row'
-  for (let c = 0; c < 5; c++) {
-    const input = document.createElement('input')
-    input.type = 'text'
-    input.maxLength = 1
-    input.classList.add('state-0')
-    input.dataset.state = '0'
-    row.appendChild(input)
-  }
-  grid.appendChild(row)
-}
-
-fetch('fiveLetterWords.json')
-  .then(res => res.json())
-  .then(data => {
-    wordList = Object.keys(data)
-    updateSuggestions()
-  })
-  .catch(() => {
-    output.textContent = 'Failed to load word list.'
-  })
 
 function debounceUpdate() {
   clearTimeout(debounceTimer)
