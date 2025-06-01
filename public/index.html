@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Helper</title>
-   <style>
+  <style>
     body {
       background: #121213;
       color: #fff;
@@ -37,7 +37,6 @@
     .wordle-row input.state-1 { background-color: #b59f3b; }
     .wordle-row input.state-2 { background-color: #538d4e; }
     .wordle-row input:focus { outline: 2px solid #565758; }
-
     #output {
       margin-top: 2rem;
       width: 100%;
@@ -87,27 +86,6 @@
     }
     .word-box button:hover { background: #666; }
     .word-box button.copied { background: #4caf50 !important; }
-
-    @media (max-width: 600px) {
-      .wordle-row {
-        grid-template-columns: repeat(5, 50px);
-        gap: 6px;
-      }
-      .wordle-row input {
-        width: 50px;
-        height: 50px;
-        font-size: 1.5rem;
-      }
-      .word-box {
-        font-size: 1rem;
-        width: auto;
-        padding: 4px 6px;
-      }
-      table {
-        min-width: unset;
-        width: 100%;
-      }
-    }
   </style>
 </head>
 <body>
