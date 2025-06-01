@@ -127,49 +127,24 @@ function debounceUpdate() {
 
 function updateSuggestions() {
   const inputs = document.querySelectorAll('#grid input')
-  const mustContain = new Set()
-  const mustNotContainRaw = new Set()
-  const atPosition = ['', '', '', '', '']
-  let knownLetters = []
+  const known = []
 
   inputs.forEach((input, idx) => {
     const val = input.value.toLowerCase()
     const pos = idx % 5
     const state = Number(input.dataset.state)
-    if (!val.match(/[a-z]/)) return
-    knownLetters.push({ char: val, pos, state })
-    if (state === 0) mustNotContainRaw.add(val)
-    if (state === 1) mustContain.add(val)
-    if (state === 2) {
-      mustContain.add(val)
-      atPosition[pos] = val
-    }
+    if (val.match(/[a-z]/)) known.push({ char: val, pos, state })
   })
 
-  if (!knownLetters.length) {
-    output.innerHTML = "<p style='text-align:center;'>Enter some letters above.</p>"
-    return
-  }
-
-  const allValidLetters = new Set(knownLetters.filter(k => k.state > 0).map(k => k.char))
-  const mustNotContain = Array.from(mustNotContainRaw).filter(c => !allValidLetters.has(c))
-
-  let filtered = wordList.filter(word => {
-    if (mustNotContain.some(ch => word.includes(ch))) return false
-    if (!Array.from(mustContain).every(ch => word.includes(ch))) return false
-    for (let i = 0; i < 5; i++) {
-      if (atPosition[i] && word[i] !== atPosition[i]) return false
-    }
-    for (const k of knownLetters) {
-      if (k.state === 1 && word[k.pos] === k.char) return false
-    }
-    return true
+  fetch('/api/filter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ known })
   })
-
-  if (JSON.stringify(filtered) === JSON.stringify(lastWords)) return
-  lastWords = filtered
-  renderTable(filtered)
+    .then(res => res.json())
+    .then(data => renderTable(data.words))
 }
+
 
 function renderTable(words) {
   if (words.length === 0) {
