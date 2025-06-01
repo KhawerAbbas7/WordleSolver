@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Helper</title>
   <style>
     body {
@@ -36,6 +37,7 @@
     .wordle-row input.state-1 { background-color: #b59f3b; }
     .wordle-row input.state-2 { background-color: #538d4e; }
     .wordle-row input:focus { outline: 2px solid #565758; }
+
     #output {
       margin-top: 2rem;
       width: 100%;
@@ -85,91 +87,162 @@
     }
     .word-box button:hover { background: #666; }
     .word-box button.copied { background: #4caf50 !important; }
+
+    @media (max-width: 600px) {
+      .wordle-row {
+        grid-template-columns: repeat(5, 50px);
+        gap: 6px;
+      }
+      .wordle-row input {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+      .word-box {
+        font-size: 1rem;
+        width: auto;
+        padding: 4px 6px;
+      }
+      table {
+        min-width: unset;
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="grid"></div>
   <div id="output">Loading words...</div>
-<script>
 
-function debounceUpdate() {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(updateSuggestions, 150)
-}
+  <script>
+    let debounceTimer
+    let lastKnown = ""
 
-function updateSuggestions() {
-  const inputs = document.querySelectorAll('#grid input')
-  const known = []
+    function createInputGrid(rows = 6) {
+      const grid = document.getElementById('grid')
+      for (let r = 0; r < rows; r++) {
+        const row = document.createElement('div')
+        row.className = 'wordle-row'
+        for (let c = 0; c < 5; c++) {
+          const input = document.createElement('input')
+          input.setAttribute('maxlength', 1)
+          input.dataset.state = '0'
+          row.appendChild(input)
+        }
+        grid.appendChild(row)
+      }
+    }
 
-  inputs.forEach((input, idx) => {
-    const val = input.value.toLowerCase()
-    const pos = idx % 5
-    const state = Number(input.dataset.state)
-    if (val.match(/[a-z]/)) known.push({ char: val, pos, state })
-  })
+    function debounceUpdate() {
+      clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(updateSuggestions, 150)
+    }
 
-  fetch('/api/filter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ known })
-  })
-    .then(res => res.json())
-    .then(data => renderTable(data.words))
-}
+    function updateSuggestions() {
+      const inputs = document.querySelectorAll('#grid input')
+      const known = []
 
+      inputs.forEach((input, idx) => {
+        const val = input.value.toLowerCase()
+        const pos = idx % 5
+        const state = Number(input.dataset.state)
+        if (val.match(/[a-z]/)) known.push({ char: val, pos, state })
+      })
 
-function renderTable(words) {
-  if (words.length === 0) {
-    output.innerHTML = "<p style='text-align:center;'>No matching words found.</p>"
-    return
-  }
-  const cols = 6
-  let html = `<table><thead><tr><th colspan="${cols}">Matching Words (${words.length})</th></tr></thead><tbody><tr>`
-  words.forEach((w, i) => {
-    html += `<td><div class="word-box"><span>${w}</span><button onclick="copyWord(this, '${w}')">📋</button></div></td>`
-    if ((i + 1) % cols === 0 && i !== words.length - 1) html += '</tr><tr>'
-  })
-  const remainder = words.length % cols
-  if (remainder > 0) for (let i = 0; i < cols - remainder; i++) html += "<td></td>"
-  html += "</tr></tbody></table>"
-  output.innerHTML = html
-}
+      const str = JSON.stringify(known)
+      if (str === lastKnown) return
+      lastKnown = str
 
-window.copyWord = (btn, word) => {
-  navigator.clipboard.writeText(word)
-  btn.classList.add('copied')
-  btn.innerText = '✅'
-  setTimeout(() => {
-    btn.classList.remove('copied')
-    btn.innerText = '📋'
-  }, 1000)
-}
+      output.innerHTML = "<p style='text-align:center;'>Loading...</p>"
 
-const inputs = document.querySelectorAll('#grid input')
-inputs.forEach((input, idx, arr) => {
-  input.addEventListener('input', () => {
-    const val = input.value.toUpperCase()
-    if (val) input.value = val[0]
-    if (val && idx < arr.length - 1) arr[idx + 1].focus()
-    debounceUpdate()
-  })
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Backspace' && !input.value && idx > 0) arr[idx - 1].focus()
-  })
-  input.addEventListener('click', () => {
-    if (!input.value) return
-    let state = Number(input.dataset.state)
-    state = (state + 1) % 3
-    input.dataset.state = state
-    input.classList.remove('state-0', 'state-1', 'state-2')
-    input.classList.add('state-' + state)
-    debounceUpdate()
-  })
-})
+      fetch('/api/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: str
+      })
+      .then(res => res.json())
+      .then(data => renderTable(data.words || []))
+    }
 
-window.onload = () => {
-  if (inputs.length) inputs[0].focus()
-}
-</script>
+    function renderTable(words) {
+      if (!words.length) {
+        output.innerHTML = "<p style='text-align:center;'>No matching words found.</p>"
+        return
+      }
+
+      const fragment = document.createDocumentFragment()
+      const table = document.createElement('table')
+      const thead = table.createTHead()
+      const trHead = thead.insertRow()
+      const th = document.createElement('th')
+      th.colSpan = 6
+      th.textContent = `Matching Words (${words.length})`
+      trHead.appendChild(th)
+
+      const tbody = table.createTBody()
+      for (let i = 0; i < words.length; i += 6) {
+        const tr = tbody.insertRow()
+        for (let j = 0; j < 6; j++) {
+          const td = tr.insertCell()
+          const word = words[i + j]
+          if (word) {
+            const box = document.createElement('div')
+            box.className = 'word-box'
+            box.innerHTML = `<span>${word}</span><button onclick="copyWord(this, '${word}')">📋</button>`
+            td.appendChild(box)
+          }
+        }
+      }
+
+      fragment.appendChild(table)
+      output.innerHTML = ''
+      output.appendChild(fragment)
+    }
+
+    window.copyWord = (btn, word) => {
+      navigator.clipboard.writeText(word)
+      btn.classList.add('copied')
+      btn.innerText = '✅'
+      setTimeout(() => {
+        btn.classList.remove('copied')
+        btn.innerText = '📋'
+      }, 1000)
+    }
+
+    function bindInputs() {
+      const inputs = document.querySelectorAll('#grid input')
+
+      inputs.forEach((input, idx, arr) => {
+        input.addEventListener('input', e => {
+          const val = e.target.value.toUpperCase()
+          if (val) e.target.value = val[0]
+          debounceUpdate()
+        })
+
+        input.addEventListener('keyup', e => {
+          if (e.key !== 'Backspace' && idx < arr.length - 1) arr[idx + 1].focus()
+          if (e.key === 'Backspace' && !input.value && idx > 0) arr[idx - 1].focus()
+        })
+
+        input.addEventListener('click', () => {
+          if (!input.value) return
+          let state = Number(input.dataset.state)
+          state = (state + 1) % 3
+          input.dataset.state = state
+          input.classList.remove('state-0', 'state-1', 'state-2')
+          input.classList.add('state-' + state)
+          debounceUpdate()
+        })
+      })
+
+      if (inputs.length) inputs[0].focus()
+    }
+
+    window.onload = () => {
+      createInputGrid()
+      bindInputs()
+      updateSuggestions()
+    }
+  </script>
 </body>
 </html>
