@@ -1,217 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wordle Helper</title>
-  <style>
-    body {
-      background: #121213;
-      color: #fff;
-      font-family: 'Clear Sans', Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      margin: 0;
-    }
-    .wordle-row {
-      display: grid;
-      grid-template-columns: repeat(5, 60px);
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .wordle-row input {
-      width: 60px;
-      height: 60px;
-      text-align: center;
-      font-size: 2rem;
-      font-weight: bold;
-      background-color: #3a3a3c;
-      border: none;
-      color: #fff;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    .wordle-row input.state-0 { background-color: #3a3a3c; }
-    .wordle-row input.state-1 { background-color: #b59f3b; }
-    .wordle-row input.state-2 { background-color: #538d4e; }
-    .wordle-row input:focus { outline: 2px solid #565758; }
-
-    #output {
-      margin-top: 2rem;
-      width: 100%;
-      max-width: 100%;
-      overflow-x: auto;
-      padding: 10px;
-      background: #222;
-      border-radius: 8px;
-    }
-    table {
-      border-collapse: collapse;
-      min-width: 600px;
-      white-space: nowrap;
-    }
-    thead th {
-      background: #333;
-      padding: 12px;
-      font-weight: bold;
-      border-bottom: 2px solid #555;
-      text-align: center;
-    }
-    tbody td {
-      padding: 10px;
-      border-bottom: 1px solid #444;
-      text-align: center;
-    }
-    .word-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #2a2a2a;
-      padding: 5px 8px;
-      border-radius: 6px;
-      width: 120px;
-      font-family: monospace;
-      font-size: 1.1rem;
-    }
-    .word-box button {
-      background: #444;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-size: 0.9rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .word-box button:hover { background: #666; }
-    .word-box button.copied { background: #4caf50 !important; }
-
-    @media (max-width: 600px) {
-      .wordle-row {
-        grid-template-columns: repeat(5, 50px);
-        gap: 6px;
-      }
-      .wordle-row input {
-        width: 50px;
-        height: 50px;
-        font-size: 1.5rem;
-      }
-      .word-box {
-        font-size: 1rem;
-        width: auto;
-        padding: 4px 6px;
-      }
-      table {
-        min-width: unset;
-        width: 100%;
-      }
-    }
-  </style>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wordle Helper — Khawer Abbas Qaisrani</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1112;--panel:#0f1720;--muted:#9aa4ad;--accent:#16a34a;--gold:#b59f3b;--card:#0b0d0e;--glass:rgba(255,255,255,0.03);--shadow:0 4px 12px rgba(2,6,23,0.5)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0d0e;color:#e6eef3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;display:flex;justify-content:center;align-items:flex-start;padding:20px}
+.container{width:100%;max-width:1000px}
+.header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#0ea5a1);display:flex;align-items:center;justify-content:center;font-weight:800;color:#021;box-shadow:var(--shadow)}
+.title{font-size:20px;font-weight:700}
+.subtitle{font-size:12px;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{background:var(--glass);border:1px solid rgba(255,255,255,0.05);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer;font-size:14px}
+.btn.primary{background:linear-gradient(90deg,#111827,#0b1220)}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:16px;box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:16px}
+.left{flex:1 1 360px}
+.right{flex:1 1 300px;display:flex;flex-direction:column}
+.card{background:var(--card);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.05)}
+.grid-wrap{display:flex;flex-direction:column;gap:8px}
+.wordle-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.wordle-row input{width:100%;aspect-ratio:1/1;text-align:center;font-size:1.5rem;font-weight:800;border:2px solid #333;border-radius:8px;background:#111316;color:#fff;text-transform:uppercase;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s}
+.wordle-row input.state-0{background:#111316;border-color:#444}
+.wordle-row input.state-1{background:var(--gold);color:#071014;border-color:#d4b74d}
+.wordle-row input.state-2{background:var(--accent);color:#021;border-color:#22c55e}
+.wordle-row input:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 8px rgba(96,165,250,0.5)}
+.output{margin-top:10px;overflow:auto}
+.word-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.word-box{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.05);font-family:monospace}
+.word-box button{background:none;border:none;color:#ccc;cursor:pointer}
+.footer{margin-top:8px;text-align:center;font-size:12px;color:var(--muted)}
+@media (max-width:600px){body{padding:10px}.panel{flex-direction:column}.header{flex-direction:column;align-items:flex-start}.wordle-row input{font-size:1.2rem}.btn{padding:6px 10px;font-size:13px}.word-box{font-size:0.9rem;padding:6px}}
+</style>
 </head>
 <body>
-  <div id="grid"></div>
-  <div id="output">Loading words...</div>
+<div class="container">
+  <div class="header">
+    <div class="brand"><div class="logo">WH</div><div><div class="title">Wordle Helper</div><div class="subtitle">by Khawer Abbas Qaisrani</div></div></div>
+    <div class="controls"><button class="btn" id="clearBtn">Clear</button><button class="btn" id="refreshBtn">Refresh</button></div>
+  </div>
+  <div class="panel">
+    <div class="left"><div id="gridContainer" class="grid-wrap"></div></div>
+    <div class="right"><div class="card"><div id="resultsCount">Loading...</div><div id="wordsList" class="word-list"></div></div><div class="footer">Created by <a href="https://khawi.vercel.app" target="_blank" style="color:#4ade80;text-decoration:none">Khawer Abbas Qaisrani</a></div></div>
+  </div>
+</div>
 <script>
-const grid = document.getElementById('grid')
-const output = document.getElementById('output')
-let wordList = []
-let debounceTimer, lastWords = []
-
-for (let r = 0; r < 5; r++) {
-  const row = document.createElement('div')
-  row.className = 'wordle-row'
-  for (let c = 0; c < 5; c++) {
-    const input = document.createElement('input')
-    input.type = 'text'
-    input.maxLength = 1
-    input.classList.add('state-0')
-    input.dataset.state = '0'
-    row.appendChild(input)
-  }
-  grid.appendChild(row)
-}
-
-
-function debounceUpdate() {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(updateSuggestions, 150)
-}
-function updateSuggestions() {
-  const inputs = document.querySelectorAll('#grid input')
-  const known = []
-
-  inputs.forEach((input, idx) => {
-    const val = input.value.toLowerCase()
-    const pos = idx % 5
-    const state = Number(input.dataset.state)
-    if (val.match(/[a-z]/)) known.push({ char: val, pos, state })
-  })
-
-  fetch('/api/filter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ known })
-  })
-    .then(res => res.json())
-    .then(data => renderTable(data.words))
-}
-
-
-function renderTable(words) {
-  if (words.length === 0) {
-    output.innerHTML = "<p style='text-align:center;'>No matching words found.</p>"
-    return
-  }
-  const cols = 6
-  let html = `<table><thead><tr><th colspan="${cols}">Matching Words (${words.length})</th></tr></thead><tbody><tr>`
-  words.forEach((w, i) => {
-    html += `<td><div class="word-box"><span>${w}</span><button onclick="copyWord(this, '${w}')">📋</button></div></td>`
-    if ((i + 1) % cols === 0 && i !== words.length - 1) html += '</tr><tr>'
-  })
-  const remainder = words.length % cols
-  if (remainder > 0) for (let i = 0; i < cols - remainder; i++) html += "<td></td>"
-  html += "</tr></tbody></table>"
-  output.innerHTML = html
-}
-
-window.copyWord = (btn, word) => {
-  navigator.clipboard.writeText(word)
-  btn.classList.add('copied')
-  btn.innerText = '✅'
-  setTimeout(() => {
-    btn.classList.remove('copied')
-    btn.innerText = '📋'
-  }, 1000)
-}
-
-const inputs = document.querySelectorAll('#grid input')
-inputs.forEach((input, idx, arr) => {
-  input.addEventListener('input', () => {
-    const val = input.value.toUpperCase()
-    if (val) input.value = val[0]
-    if (val && idx < arr.length - 1) arr[idx + 1].focus()
-    debounceUpdate()
-  })
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Backspace' && !input.value && idx > 0) arr[idx - 1].focus()
-  })
-  input.addEventListener('click', () => {
-    if (!input.value) return
-    let state = Number(input.dataset.state)
-    state = (state + 1) % 3
-    input.dataset.state = state
-    input.classList.remove('state-0', 'state-1', 'state-2')
-    input.classList.add('state-' + state)
-    debounceUpdate()
-  })
-})
-
-window.onload = () => {
-  if (inputs.length) inputs[0].focus()
-}
+const ROWS=6,COLS=5;const grid=document.getElementById('gridContainer');const results=document.getElementById('resultsCount');const list=document.getElementById('wordsList');let timer;
+function createGrid(){for(let r=0;r<ROWS;r++){const row=document.createElement('div');row.className='wordle-row';for(let c=0;c<COLS;c++){const i=document.createElement('input');i.maxLength=1;i.dataset.state='0';i.classList.add('state-0');i.addEventListener('click',()=>{if(!i.value)return;let s=+i.dataset.state;s=(s+1)%3;i.dataset.state=s;i.className='';i.classList.add('state-'+s)});i.addEventListener('input',()=>{i.value=i.value.toUpperCase();debounce(fetchWords)});row.appendChild(i)}grid.appendChild(row)}}
+function debounce(fn){clearTimeout(timer);timer=setTimeout(fn,300)}
+async function fetchWords(){results.textContent='Searching...';const inputs=[...document.querySelectorAll('#gridContainer input')];const g=Array(5).fill('?'),y=new Set(),x=new Set();inputs.forEach((i,j)=>{const v=i.value.toLowerCase();const s=+i.dataset.state;if(!/[a-z]/.test(v))return;if(s===2)g[j%5]=v;else if(s===1)y.add(v);else x.add(v)});const sp=g.join('');try{const r=await fetch(`https://api.datamuse.com/words?sp=${sp}&max=500`);const d=await r.json();let w=d.map(o=>o.word).filter(a=>a.length===5);if(y.size)w=w.filter(a=>[...y].every(c=>a.includes(c)));if(x.size)w=w.filter(a=>![...x].some(c=>a.includes(c)));render(w.slice(0,100))}catch(e){results.textContent='Error loading words'}}
+function render(words){list.innerHTML='';results.textContent=`Matches: ${words.length}`;if(!words.length){list.innerHTML='<div>No matches</div>';return}words.forEach(w=>{const b=document.createElement('div');b.className='word-box';b.innerHTML=`<span>${w.toUpperCase()}</span><button>📋</button>`;b.querySelector('button').onclick=async()=>{await navigator.clipboard.writeText(w)};list.appendChild(b)})}
+document.getElementById('clearBtn').onclick=()=>{document.querySelectorAll('#gridContainer input').forEach(i=>{i.value='';i.className='state-0';i.dataset.state='0'});list.innerHTML='';results.textContent='Cleared'};document.getElementById('refreshBtn').onclick=fetchWords;createGrid();fetchWords();
 </script>
 </body>
 </html>
